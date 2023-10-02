@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data.moonstream.to/schemas/check-please.json",
+  "title": "Check, Please",
+  "description": "JSON schema for *Check, Please* checklists",
+  "type": "object",
+  "properties": {
+    "requester": {
+      "type": "string",
+      "description": "Address or other string identifying the person who is requesting completion of this checklist"
+    },
+    "executor": {
+      "type": "string",
+      "description": "Address or other string identifying the person who should execute this checklist"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the checklist"
+    },
+    "steps": {
+      "type": "array",
+      "description": "Steps to be executed",
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "required": ["executor"],
+  "$defs": {
+    "step": {
+      "type": "object",
+      "properties": {
+        "chain_id": {
+          "type": "string",
+          "description": "Chain ID for network that transaction should be executed on"
+        },
+        "to": {
+          "type": "string",
+          "description": "To address for the transaction"
+        },
+        "value": {
+          "type": "string",
+          "description": "Amount of wei (lowest denomination of native token) to send with the transaction"
+        },
+        "calldata": {
+          "type": "string",
+          "description": "Calldata for the transaction"
+        },
+        "method_abi": {
+          "type": "object",
+          "description": "ABI for the method to be called - this can be used to contextualize the calldata"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the step"
+        },
+        "tx_hash": {
+          "type": "string",
+          "description": "Hash of the transaction that was executed for this step"
+        }
+      },
+      "required": ["chain_id", "to"]
+    }
+  },
+  "$comment": "JSON Schema spec: https://json-schema.org/draft/2020-12/json-schema-core"
+}

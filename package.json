@@ -1,0 +1,30 @@
+{
+  "name": "check-please",
+  "version": "0.1.0",
+  "description": "Shareable web3 checklists",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonstream-to/check-please.git"
+  },
+  "keywords": [
+    "web3"
+  ],
+  "author": "Moonstream Engineering (engineering@moonstream.to)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/moonstream-to/check-please/issues"
+  },
+  "homepage": "https://github.com/moonstream-to/check-please#readme",
+  "devDependencies": {
+    "@types/node": "^20.8.2",
+    "@types/web3": "^1.2.2",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "web3": "^4.1.2"
+  }
+}
