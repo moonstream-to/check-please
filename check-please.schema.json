@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://data.moonstream.to/schemas/check-please.json",
-  "title": "Check, Please",
+  "$id": "https://data.moonstream.to/schemas/check-please.schema.json",
+  "title": "Checklist",
   "description": "JSON schema for *Check, Please* checklists",
   "type": "object",
   "properties": {
@@ -26,6 +26,7 @@
     }
   },
   "required": ["executor"],
+  "additionalProperties": false,
   "$defs": {
     "step": {
       "type": "object",
@@ -59,7 +60,8 @@
           "description": "Hash of the transaction that was executed for this step"
         }
       },
-      "required": ["chain_id", "to"]
+      "required": ["chain_id", "to"],
+      "additionalProperties": false
     }
   },
   "$comment": "JSON Schema spec: https://json-schema.org/draft/2020-12/json-schema-core"
