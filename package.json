@@ -5,8 +5,8 @@
   "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "schemagen": "./node_modules/.bin/json2ts check-please.schema.json src/schema.ts",
-    "pretty": "./node_modules/.bin/prettier -w src/"
+    "pretty": "./node_modules/.bin/prettier -w src/",
+    "build": "./node_modules/.bin/tsc"
   },
   "repository": {
     "type": "git",
@@ -23,8 +23,6 @@
   "homepage": "https://github.com/moonstream-to/check-please#readme",
   "devDependencies": {
     "@types/node": "^20.8.2",
-    "@types/web3": "^1.2.2",
-    "json-schema-to-typescript": "^13.1.1",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
