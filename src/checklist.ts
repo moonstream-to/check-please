@@ -35,7 +35,7 @@ export interface ViewStep extends BaseStep {
 
   // The parameters that should be passed to the method. These can be Handlebars.js templates, which will be
   // populated using the execution context created by generateExecutionContext below.
-  params: any[];
+  params: string[];
 
   // The output of the view call (to be populated once it has been executed).
   output?: any;
@@ -84,7 +84,7 @@ export interface MethodCallStep extends BaseStep {
 
   // The parameters that should be passed to the method. These can be Handlebars.js templates, which will be
   // populated using the execution context created by generateExecutionContext below.
-  params: any[];
+  params: string[];
 
   // The value to be sent with the transaction. These should be denominated in the smallest denomination
   // of the chain's native token. For example, on Ethereum, Wei.
