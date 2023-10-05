@@ -1,0 +1,14 @@
+name: Test Check, Please
+on: pull_request
+jobs:
+  test:
+    name: Run tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Instal dependencies
+        run: npm install --include=dev
+      - name: Run tests
+        run: npm test
