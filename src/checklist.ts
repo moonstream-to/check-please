@@ -33,7 +33,8 @@ export interface ViewStep extends BaseStep {
   // The ABI of the method that should be called.
   methodABI: object;
 
-  // The parameters that should be passed to the method.
+  // The parameters that should be passed to the method. These can be Handlebars.js templates, which will be
+  // populated using the execution context created by generateExecutionContext below.
   params: any[];
 
   // The output of the view call (to be populated once it has been executed).
@@ -64,6 +65,9 @@ export interface RawStep extends BaseStep {
 
   // The transaction hash for the transaction (to be populated once it has been executed).
   txHash?: string;
+
+  // true if the transaction was successful, false otherwise (to be populated once it has been executed).
+  success?: boolean;
 }
 
 export interface MethodCallStep extends BaseStep {
@@ -78,7 +82,8 @@ export interface MethodCallStep extends BaseStep {
   // The ABI of the method that should be called.
   methodABI: object;
 
-  // The parameters that should be passed to the method.
+  // The parameters that should be passed to the method. These can be Handlebars.js templates, which will be
+  // populated using the execution context created by generateExecutionContext below.
   params: any[];
 
   // The value to be sent with the transaction. These should be denominated in the smallest denomination
@@ -87,6 +92,9 @@ export interface MethodCallStep extends BaseStep {
 
   // The transaction hash for the transaction (to be populated once it has been executed).
   txHash?: string;
+
+  // true if the transaction was successful, false otherwise (to be populated once it has been executed).
+  success?: boolean;
 
   // The output, if any, of the method call (to be populated once it has been executed).
   output?: any;
@@ -112,4 +120,106 @@ export interface Checklist {
   requester: string;
   description?: string;
   steps: Step[];
+  complete?: boolean;
+}
+
+export interface StepResult {
+  success: boolean;
+  value?: any;
+}
+
+export function checkStepIDs(checklist: Checklist): boolean {
+  let stepIDs: { [k: string]: boolean } = {};
+
+  // Check that stepIDs are unique.
+  for (let step of checklist.steps) {
+    if (stepIDs[step.stepID]) {
+      return false;
+    }
+
+    stepIDs[step.stepID] = true;
+  }
+
+  // Check that no step depends on steps that don't exist.
+  for (let step of checklist.steps) {
+    for (let dependencyID of step.dependsOn) {
+      if (stepIDs[dependencyID] === undefined) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+export function checkDependencies(checklist: Checklist): boolean {
+  // Check that there are no circular dependencies.
+  // CONTINUE HERE
+  return false;
+}
+
+export function nextSteps(checklist: Checklist): Step[] {
+  let completeSteps: { [k: string]: Step } = {};
+  let incompleteSteps: Step[] = [];
+  let nextSteps: Step[] = [];
+
+  for (let step of checklist.steps) {
+    if (isStepComplete(step)) {
+      completeSteps[step.stepID] = step;
+    } else {
+      incompleteSteps.push(step);
+    }
+  }
+
+  for (let step of incompleteSteps) {
+    let dependenciesComplete = true;
+
+    for (let dependencyID of step.dependsOn) {
+      if (!completeSteps[dependencyID]) {
+        dependenciesComplete = false;
+        break;
+      }
+    }
+
+    if (dependenciesComplete) {
+      nextSteps.push(step);
+    }
+  }
+
+  return nextSteps;
+}
+
+// Execution context has the form:
+// { <stepID>: {success: true | false, output: ... } }
+// for stepIDs of completed steps.
+export function generateExecutionContext(checklist: Checklist): {
+  [k: string]: any;
+} {
+  let completeSteps = checklist.steps.filter(isStepComplete);
+  let context: { [k: string]: StepResult } = {};
+
+  completeSteps.forEach((step) => {
+    switch (step.stepType) {
+      case "manual":
+        context[step.stepID] = { success: true, value: step.value };
+        break;
+      case "view":
+        context[step.stepID] = { success: true, value: step.output };
+        break;
+      case "raw":
+        context[step.stepID] = {
+          success: step.success !== undefined ? step.success : false,
+          value: step.txHash,
+        };
+        break;
+      case "call":
+        context[step.stepID] = {
+          success: step.success !== undefined ? step.success : false,
+          value: step.output,
+        };
+        break;
+    }
+  });
+
+  return context;
 }
