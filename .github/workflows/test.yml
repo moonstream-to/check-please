@@ -3,6 +3,7 @@ on: pull_request
 jobs:
   test:
     name: Run tests
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
