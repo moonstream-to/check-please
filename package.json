@@ -4,7 +4,7 @@
   "description": "Shareable web3 checklists",
   "main": "build/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/.bin/tsc && ./node_modules/.bin/mocha build/test/",
     "pretty": "./node_modules/.bin/prettier -w src/",
     "build": "./node_modules/.bin/tsc"
   },
@@ -22,7 +22,11 @@
   },
   "homepage": "https://github.com/moonstream-to/check-please#readme",
   "devDependencies": {
+    "@types/chai": "^4.3.6",
+    "@types/mocha": "^10.0.2",
     "@types/node": "^20.8.2",
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },

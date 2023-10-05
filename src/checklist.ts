@@ -152,10 +152,64 @@ export function checkStepIDs(checklist: Checklist): boolean {
   return true;
 }
 
-export function checkDependencies(checklist: Checklist): boolean {
-  // Check that there are no circular dependencies.
-  // CONTINUE HERE
-  return false;
+// Check if there are any cycles in the dependency graph of the steps in this checklist.
+// Returns a list of steps that are part of cycles.
+//
+// This is done by imposing a level to stages in this checklist. The level of steps with no dependencies
+// is 1. The level of a step with dependencies is 1 + the maximum level of any of its dependencies.
+// In the even of a circular dependency, there will come a point in this calculation where we cannot
+// assign a level to any remainint stage. In this event, we will raise an error.
+export function cycles(steps: Step[]): Step[] {
+  const levels: { [k: string]: number } = {};
+  calculateLevels(steps, 1, levels);
+
+  const unlevelledSteps = steps.filter(
+    (step) => levels[step.stepID] === undefined
+  );
+
+  return unlevelledSteps;
+}
+
+function nextLevel(steps: Step[], levels: { [k: string]: number }): Step[] {
+  let levelSteps: Step[] = [];
+
+  for (let step of steps) {
+    if (levels[step.stepID] === undefined) {
+      if (step.dependsOn.every((dependencyID) => !!levels[dependencyID])) {
+        levelSteps.push(step);
+      }
+    }
+  }
+
+  return levelSteps;
+}
+
+function calculateLevels(
+  steps: Step[],
+  currentLevel: number,
+  levels: { [k: string]: number }
+): void {
+  if (currentLevel === undefined) {
+    currentLevel = 1;
+  }
+  if (levels === undefined) {
+    levels = {};
+  }
+
+  let levelSteps = nextLevel(steps, levels);
+  if (levelSteps.length === 0) {
+    return;
+  }
+
+  for (let step of levelSteps) {
+    levels[step.stepID] = currentLevel;
+  }
+
+  return calculateLevels(
+    steps.filter((step) => levels[step.stepID] === undefined),
+    currentLevel + 1,
+    levels
+  );
 }
 
 export function nextSteps(checklist: Checklist): Step[] {
@@ -163,7 +217,21 @@ export function nextSteps(checklist: Checklist): Step[] {
   let incompleteSteps: Step[] = [];
   let nextSteps: Step[] = [];
 
-  for (let step of checklist.steps) {
+  const levels: { [k: string]: number } = {};
+  calculateLevels(checklist.steps, 1, levels);
+
+  // Make a shallow copy because we will sort.
+  let steps = [...checklist.steps];
+  steps.sort((a, b) => {
+    if (levels[a.stepID] < levels[b.stepID]) {
+      return -1;
+    } else if (levels[a.stepID] > levels[b.stepID]) {
+      return 1;
+    }
+    return 0;
+  });
+
+  for (let step of steps) {
     if (isStepComplete(step)) {
       completeSteps[step.stepID] = step;
     } else {
@@ -171,10 +239,20 @@ export function nextSteps(checklist: Checklist): Step[] {
     }
   }
 
+  let transitiveDependencies: { [k: string]: string[] } = {};
+  for (let step of steps) {
+    transitiveDependencies[step.stepID] = [...step.dependsOn];
+    for (let dependency of step.dependsOn) {
+      transitiveDependencies[step.stepID] = transitiveDependencies[
+        step.stepID
+      ].concat(transitiveDependencies[dependency] || []);
+    }
+  }
+
   for (let step of incompleteSteps) {
     let dependenciesComplete = true;
 
-    for (let dependencyID of step.dependsOn) {
+    for (let dependencyID of transitiveDependencies[step.stepID] || []) {
       if (!completeSteps[dependencyID]) {
         dependenciesComplete = false;
         break;
