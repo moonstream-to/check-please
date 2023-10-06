@@ -6,7 +6,7 @@ import {
   cycles,
   InputStep,
   isStepComplete,
-  MethodCallStep,
+  MethodStep,
   nextSteps,
   RawStep,
   Step,
@@ -120,10 +120,10 @@ describe("isStepComplete", function () {
     );
   });
 
-  it("handles MethodCallSteps correctly", function () {
-    const step: MethodCallStep = {
+  it("handles MethodSteps correctly", function () {
+    const step: MethodStep = {
       ...baseStep(),
-      stepType: "call",
+      stepType: "method",
       chainID: "1",
       to: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       methodABI: {
