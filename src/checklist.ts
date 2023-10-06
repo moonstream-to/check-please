@@ -172,6 +172,16 @@ export interface StepResult {
 }
 
 /**
+ * ExecutionContext represents a context in which steps on a Checklist can be executed. It contains
+ * StepResults corresponding to the results of all completed steps in the Checklist.
+ * These can be used by steps which are being executed to interpolate data from previous steps into
+ * their parameters.
+ * Parameter interpolations are expected to be handlebars.js templates which are applied to the
+ * ExecutionContext object
+ */
+type ExecutionContext = { [k: string]: StepResult };
+
+/**
  * checkStepIDs validates that:
  * 1. The steps in a checklist have distinct IDs
  * 2. That no step declared a dependency that doesn't match one of the defined stepIDs
@@ -344,12 +354,11 @@ export function nextSteps(checklist: Checklist): Step[] {
 /**
  * Generates an execution context which is used to interpolate parameters into steps (ViewStep, MethodCallSteps).
  * @param checklist - checklist being executed
- * @returns execution context - parameter interpolations are expected to be handlebars.js templates which
- * are applied to this object
+ * @returns execution context -
  */
-export function generateExecutionContext(checklist: Checklist): {
-  [k: string]: StepResult;
-} {
+export function generateExecutionContext(
+  checklist: Checklist
+): ExecutionContext {
   let completeSteps = checklist.steps.filter(isStepComplete);
   let context: { [k: string]: StepResult } = {};
 
