@@ -15,11 +15,15 @@ import {
   InputStep,
   MethodStep,
   RawStep,
-  StepResult,
   ViewStep,
 } from "./checklist";
-import { exec } from "child_process";
 
+/**
+ * Completer for InputSteps. Accepts user input and stores it appropriately.
+ * @param executionContext
+ * @param step
+ * @returns
+ */
 export function completeInputStep(
   executionContext: ExecutionContext,
   step: InputStep
@@ -34,6 +38,13 @@ export function completeInputStep(
   };
 }
 
+/**
+ * Completer for method steps. Submits transactions that invoke smart contract methods and stores
+ * the results into the step and execution context.
+ * @param executionContext
+ * @param step
+ * @returns
+ */
 export function completeMethodStep(
   executionContext: ExecutionContext,
   step: MethodStep
@@ -95,6 +106,12 @@ export function completeMethodStep(
   };
 }
 
+/**
+ * Completer for RawSteps. Submits a transaction to the blockchain and updates the step and execution context.
+ * @param executionContext
+ * @param step
+ * @returns
+ */
 export function completeRawStep(
   executionContext: ExecutionContext,
   step: RawStep
@@ -137,6 +154,13 @@ export function completeRawStep(
   };
 }
 
+/**
+ * Completer for ViewSteps. Invokes view methods on smart contracts and stores the results under the step
+ * and the execution context.
+ * @param executionContext
+ * @param step
+ * @returns
+ */
 export function completeViewStep(
   executionContext: ExecutionContext,
   step: ViewStep
