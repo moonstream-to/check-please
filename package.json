@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/.bin/tsc && ./node_modules/.bin/mocha build/test/",
     "pretty": "./node_modules/.bin/prettier -w src/",
-    "build": "./node_modules/.bin/tsc"
+    "build": "./node_modules/.bin/tsc",
+    "docs": "./node_modules/.bin/tsc && ./node_modules/.bin/jsdoc -P package.json -R README.md -r build/ -d docs/"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.8.2",
     "chai": "^4.3.10",
+    "jsdoc": "^4.0.2",
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

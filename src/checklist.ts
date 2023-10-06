@@ -1,3 +1,11 @@
+/**
+ * @file Defines the Checklist data structure and defines some functions useful when parsing checklists
+ * and executing them.
+ */
+
+/**
+ * BaseStep defines the fields that all steps share.
+ */
 export interface BaseStep {
   // String identifying the person who should execute this step.
   executor: string;
@@ -14,6 +22,9 @@ export interface BaseStep {
   dependsOn: string[];
 }
 
+/**
+ * InputStep represents a *Check, Please* step that calls for user input from its executor.
+ */
 export interface InputStep extends BaseStep {
   stepType: "manual";
 
@@ -21,6 +32,12 @@ export interface InputStep extends BaseStep {
   value?: any;
 }
 
+/**
+ * ViewStep represents a *Check, Please* step that calls for the result of the execution of a view
+ * method on a smart contract.
+ *
+ * ViewSteps can interpolate the results of other steps into their parameters.
+ */
 export interface ViewStep extends BaseStep {
   stepType: "view";
 
@@ -44,6 +61,12 @@ export interface ViewStep extends BaseStep {
   blockHash?: string;
 }
 
+/**
+ * RawStep represents a *Check, Please* step that calls for the execution of a raw transaction - i.e.
+ * the execution of a transaction from its calldata.
+ *
+ * RawSteps do not support the interpolation of results of other steps into their calldata.
+ */
 export interface RawStep extends BaseStep {
   stepType: "raw";
 
@@ -69,6 +92,13 @@ export interface RawStep extends BaseStep {
   // true if the transaction was successful, false otherwise (to be populated once it has been executed).
   success?: boolean;
 }
+
+/**
+ * MethodCallStep represents a *Check, Please* step that requires the executor to submit a transaction
+ * that invokes a function on a smart contract.
+ *
+ * MethodCallSteps can interpolate the results of other steps into their parameters.
+ */
 
 export interface MethodCallStep extends BaseStep {
   stepType: "call";
@@ -100,7 +130,10 @@ export interface MethodCallStep extends BaseStep {
   output?: any;
 }
 
-// Step is the union of all the step types. They can be distinguished using the "stepType" property.
+/**
+ * Step is the union of all the step types. They can be distinguished using the "stepType" property.
+ * This is a discriminated union consisting of all the step types that are recognized by *Check, Please*.
+ */
 export type Step = InputStep | ViewStep | RawStep | MethodCallStep;
 
 export function isStepComplete(step: Step): boolean {
@@ -116,6 +149,9 @@ export function isStepComplete(step: Step): boolean {
   }
 }
 
+/**
+ * Checklist represents a *Check, Please* checklist.
+ */
 export interface Checklist {
   requester: string;
   description?: string;
@@ -123,11 +159,23 @@ export interface Checklist {
   complete?: boolean;
 }
 
+/**
+ * StepResult represents the result of running a step. It definitely indicated whether the execution
+ * was successful or not, and if the step contains some kind of output, it is included under the "value"
+ * key.
+ */
 export interface StepResult {
   success: boolean;
   value?: any;
 }
 
+/**
+ * checkStepIDs validates that:
+ * 1. The steps in a checklist have distinct IDs
+ * 2. That no step declared a dependency that doesn't match one of the defined stepIDs
+ * @param checklist - the checklist whose steps to validate
+ * @returns true if the stepIDs in the checklist are valid and false otherwise.
+ */
 export function checkStepIDs(checklist: Checklist): boolean {
   let stepIDs: { [k: string]: boolean } = {};
 
@@ -152,13 +200,16 @@ export function checkStepIDs(checklist: Checklist): boolean {
   return true;
 }
 
-// Check if there are any cycles in the dependency graph of the steps in this checklist.
-// Returns a list of steps that are part of cycles.
-//
-// This is done by imposing a level to stages in this checklist. The level of steps with no dependencies
-// is 1. The level of a step with dependencies is 1 + the maximum level of any of its dependencies.
-// In the even of a circular dependency, there will come a point in this calculation where we cannot
-// assign a level to any remainint stage. In this event, we will raise an error.
+/**
+ * cycles checks if there are any cycles in the dependency graph of the steps in this checklist.
+ * This is done by imposing a level to stages in this checklist. The level of steps with no dependencies
+ * is 1. The level of a step with dependencies is 1 + the maximum level of any of its dependencies.
+ * In the even of a circular dependency, there will come a point in this calculation where we cannot
+ * assign a level to any remainint stage. In this event, we will raise an error.
+ *
+ * @param steps
+ * @returns a list of steps that are part of cycles
+ */
 export function cycles(steps: Step[]): Step[] {
   const levels: { [k: string]: number } = {};
   calculateLevels(steps, 1, levels);
@@ -170,6 +221,13 @@ export function cycles(steps: Step[]): Step[] {
   return unlevelledSteps;
 }
 
+/**
+ * nextLevel calculates the steps that comprise the level of the step dependency graph that comes after
+ * the levels already represented in the levels object.
+ * @param steps - list of steps to impose levels on
+ * @param levels - levels that have already been imposed
+ * @returns list of steps that comprise the next level
+ */
 function nextLevel(steps: Step[], levels: { [k: string]: number }): Step[] {
   let levelSteps: Step[] = [];
 
@@ -184,6 +242,14 @@ function nextLevel(steps: Step[], levels: { [k: string]: number }): Step[] {
   return levelSteps;
 }
 
+/**
+ * calculateLevels imposes a level structure on the steps in a list. This is done by mutating the
+ * levels object passed to the function.
+ * @param steps - the steps to impose a level structure on
+ * @param currentLevel - current level (used in recursive calls to calculateLevels); first call sets the lowest level in the structure
+ * @param levels - the levels that have already been calculated (used in recursive calls to calculate levels); first call should be an empty object
+ * @returns nothing, mutates the levels object
+ */
 function calculateLevels(
   steps: Step[],
   currentLevel: number,
@@ -212,6 +278,12 @@ function calculateLevels(
   );
 }
 
+/**
+ * nextSteps returns the steps that are ready to be executed next, based on the steps that have already
+ * been completed.
+ * @param checklist - the checklist whose steps to check
+ * @returns list of steps that can be executed next based on prior completions
+ */
 export function nextSteps(checklist: Checklist): Step[] {
   let completeSteps: { [k: string]: Step } = {};
   let incompleteSteps: Step[] = [];
@@ -267,11 +339,14 @@ export function nextSteps(checklist: Checklist): Step[] {
   return nextSteps;
 }
 
-// Execution context has the form:
-// { <stepID>: {success: true | false, output: ... } }
-// for stepIDs of completed steps.
+/**
+ * Generates an execution context which is used to interpolate parameters into steps (ViewStep, MethodCallSteps).
+ * @param checklist - checklist being executed
+ * @returns execution context - parameter interpolations are expected to be handlebars.js templates which
+ * are applied to this object
+ */
 export function generateExecutionContext(checklist: Checklist): {
-  [k: string]: any;
+  [k: string]: StepResult;
 } {
   let completeSteps = checklist.steps.filter(isStepComplete);
   let context: { [k: string]: StepResult } = {};
