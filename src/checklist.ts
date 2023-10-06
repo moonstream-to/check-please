@@ -1,6 +1,8 @@
 /**
- * @file Defines the Checklist data structure and defines some functions useful when parsing checklists
- * and executing them.
+ * @file Defines the checklist data structure and exports functions that are useful when parsing
+ * and executing checklists.
+ *
+ * @module checklist
  */
 
 /**
