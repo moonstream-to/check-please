@@ -5,6 +5,8 @@
  * @module checklist
  */
 
+import { AbiFunctionFragment } from "web3";
+
 /**
  * BaseStep defines the fields that all steps share.
  */
@@ -50,7 +52,7 @@ export interface ViewStep extends BaseStep {
   to: string;
 
   // The ABI of the method that should be called.
-  methodABI: object;
+  methodABI: AbiFunctionFragment;
 
   // The parameters that should be passed to the method. These can be Handlebars.js templates, which will be
   // populated using the execution context created by generateExecutionContext below.
@@ -86,7 +88,7 @@ export interface RawStep extends BaseStep {
   value?: string;
 
   // The ABI of the method that should be called. If provided, this is only used for display purposes.
-  methodABI?: object;
+  methodABI?: AbiFunctionFragment;
 
   // The transaction hash for the transaction (to be populated once it has been executed).
   txHash?: string;
@@ -102,8 +104,8 @@ export interface RawStep extends BaseStep {
  * MethodCallSteps can interpolate the results of other steps into their parameters.
  */
 
-export interface MethodCallStep extends BaseStep {
-  stepType: "call";
+export interface MethodStep extends BaseStep {
+  stepType: "method";
 
   // The chainID of the chain that the transaction should be executed on.
   chainID: string;
@@ -112,7 +114,7 @@ export interface MethodCallStep extends BaseStep {
   to: string;
 
   // The ABI of the method that should be called.
-  methodABI: object;
+  methodABI: AbiFunctionFragment;
 
   // The parameters that should be passed to the method. These can be Handlebars.js templates, which will be
   // populated using the execution context created by generateExecutionContext below.
@@ -136,7 +138,7 @@ export interface MethodCallStep extends BaseStep {
  * Step is the union of all the step types. They can be distinguished using the "stepType" property.
  * This is a discriminated union consisting of all the step types that are recognized by *Check, Please*.
  */
-export type Step = InputStep | ViewStep | RawStep | MethodCallStep;
+export type Step = InputStep | ViewStep | RawStep | MethodStep;
 
 export function isStepComplete(step: Step): boolean {
   switch (step.stepType) {
@@ -146,7 +148,7 @@ export function isStepComplete(step: Step): boolean {
       return step.output !== undefined;
     case "raw":
       return step.txHash !== undefined;
-    case "call":
+    case "method":
       return step.txHash !== undefined;
   }
 }
@@ -179,7 +181,7 @@ export interface StepResult {
  * Parameter interpolations are expected to be handlebars.js templates which are applied to the
  * ExecutionContext object
  */
-type ExecutionContext = { [k: string]: StepResult };
+export type ExecutionContext = { [k: string]: StepResult };
 
 /**
  * checkStepIDs validates that:
@@ -376,7 +378,7 @@ export function generateExecutionContext(
           value: step.txHash,
         };
         break;
-      case "call":
+      case "method":
         context[step.stepID] = {
           success: step.success !== undefined ? step.success : false,
           value: step.output,
