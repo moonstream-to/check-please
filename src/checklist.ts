@@ -61,7 +61,10 @@ export interface ViewStep extends BaseStep {
   // The output of the view call (to be populated once it has been executed).
   output?: any;
 
-  // The block hash at which the view call was executed (to be populated once it has been executed).
+  // The block number at which the view call was executed (to be populated once it has been executed).
+  blockNumber?: string;
+
+  // The block hash of the block number at which the view call was executed (to be populated once it has been executed).
   blockHash?: string;
 }
 
@@ -169,8 +172,9 @@ export interface Checklist {
  * key.
  */
 export interface StepResult {
-  success: boolean;
+  success?: boolean;
   value?: any;
+  executing?: boolean;
 }
 
 /**
@@ -367,21 +371,31 @@ export function generateExecutionContext(
   completeSteps.forEach((step) => {
     switch (step.stepType) {
       case "manual":
-        context[step.stepID] = { success: true, value: step.value };
+        context[step.stepID] = {
+          success: true,
+          value: step.value,
+          executing: false,
+        };
         break;
       case "view":
-        context[step.stepID] = { success: true, value: step.output };
+        context[step.stepID] = {
+          success: true,
+          value: step.output,
+          executing: false,
+        };
         break;
       case "raw":
         context[step.stepID] = {
           success: step.success !== undefined ? step.success : false,
           value: step.txHash,
+          executing: false,
         };
         break;
       case "method":
         context[step.stepID] = {
           success: step.success !== undefined ? step.success : false,
           value: step.output,
+          executing: false,
         };
         break;
     }
