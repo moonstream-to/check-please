@@ -4,6 +4,7 @@ import { Command } from "commander";
 
 const program = new Command();
 
+// Version should match the version in package.json
 program
   .name("checkpls")
   .description("Check, Please CLI")
