@@ -1,5 +1,5 @@
 {
-  "name": "check-please",
+  "name": "checkpls",
   "version": "0.1.0",
   "description": "Shareable web3 checklists",
   "main": "build/index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moonstream-to/check-please.git"
+    "url": "git+https://github.com/moonstream-to/checkpls.git"
   },
   "keywords": [
     "web3"
@@ -19,13 +19,14 @@
   "author": "Moonstream Engineering (engineering@moonstream.to)",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/moonstream-to/check-please/issues"
+    "url": "https://github.com/moonstream-to/checkpls/issues"
   },
-  "homepage": "https://github.com/moonstream-to/check-please#readme",
+  "homepage": "https://github.com/moonstream-to/checkpls#readme",
   "devDependencies": {
     "@types/chai": "^4.3.6",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.8.2",
+    "@types/terminal-kit": "^2.5.2",
     "chai": "^4.3.10",
     "jsdoc": "^4.0.2",
     "mocha": "^10.2.0",
