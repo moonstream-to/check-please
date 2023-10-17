@@ -27,7 +27,7 @@ export interface BaseStep {
 }
 
 /**
- * InputStep represents a *Check, Please* step that calls for user input from its executor.
+ * InputStep represents a *Checkpls* step that calls for user input from its executor.
  */
 export interface InputStep extends BaseStep {
   stepType: "manual";
@@ -37,7 +37,7 @@ export interface InputStep extends BaseStep {
 }
 
 /**
- * ViewStep represents a *Check, Please* step that calls for the result of the execution of a view
+ * ViewStep represents a *Checkpls* step that calls for the result of the execution of a view
  * method on a smart contract.
  *
  * ViewSteps can interpolate the results of other steps into their parameters.
@@ -69,7 +69,7 @@ export interface ViewStep extends BaseStep {
 }
 
 /**
- * RawStep represents a *Check, Please* step that calls for the execution of a raw transaction - i.e.
+ * RawStep represents a *Checkpls* step that calls for the execution of a raw transaction - i.e.
  * the execution of a transaction from its calldata.
  *
  * RawSteps do not support the interpolation of results of other steps into their calldata.
@@ -101,7 +101,7 @@ export interface RawStep extends BaseStep {
 }
 
 /**
- * MethodCallStep represents a *Check, Please* step that requires the executor to submit a transaction
+ * MethodCallStep represents a *Checkpls* step that requires the executor to submit a transaction
  * that invokes a function on a smart contract.
  *
  * MethodCallSteps can interpolate the results of other steps into their parameters.
@@ -139,7 +139,7 @@ export interface MethodStep extends BaseStep {
 
 /**
  * Step is the union of all the step types. They can be distinguished using the "stepType" property.
- * This is a discriminated union consisting of all the step types that are recognized by *Check, Please*.
+ * This is a discriminated union consisting of all the step types that are recognized by *Checkpls*.
  */
 export type Step = InputStep | ViewStep | RawStep | MethodStep;
 
@@ -157,7 +157,7 @@ export function isStepComplete(step: Step): boolean {
 }
 
 /**
- * Checklist represents a *Check, Please* checklist.
+ * Checklist represents a *Checkpls* checklist.
  */
 export interface Checklist {
   requester: string;

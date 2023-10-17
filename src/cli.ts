@@ -2,8 +2,12 @@
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
 
+import { terminal } from "terminal-kit";
+
 import { Command } from "commander";
 
+import { Checklist } from "./checklist";
+import { render } from "./render";
 import { edit } from "./tui";
 
 const program = new Command();
@@ -26,6 +30,22 @@ program
     }
 
     edit(options.checklist);
+  });
+
+program
+  .command("view")
+  .description("View a checklist in your terminal")
+  .option("-c, --checklist <file>", "path to checklist JSON file")
+  .action((options) => {
+    if (!options.checklist) {
+      console.error("Missing required argument: -c/--checklist");
+      process.exit(1);
+    }
+
+    const fileContent = readFileSync(options.checklist, "utf8");
+    const checklist: Checklist = JSON.parse(fileContent);
+
+    render(terminal, checklist, { width: terminal.width });
   });
 
 program
